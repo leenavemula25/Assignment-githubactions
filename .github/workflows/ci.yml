@@ -39,20 +39,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Step 6: Login to ECR
+      # Step 6: Login to Amazon ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-            # Step 7: Build, Tag, and Push to ECR
+      # Step 7: Build, Tag, and Push to ECR
       - name: Build, Tag, and Push to ECR
         env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: latest
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          IMAGE=${{ secrets.DOCKER_USERNAME }}/assignment-githubactions:latest
-          ECR_IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker tag $IMAGE $ECR_IMAGE
-          docker push $ECR_IMAGE
-
+          echo "Pushing to $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker tag ${{ secrets.DOCKER_USERNAME }}/assignment-githubactions:latest $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
